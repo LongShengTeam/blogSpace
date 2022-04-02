@@ -18,9 +18,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Map;
 import java.util.Random;
-import java.util.UUID;
 
 
 @Controller
@@ -38,15 +36,22 @@ public class UploadController {
         StringBuilder tempName = new StringBuilder();
         tempName.append(sdf.format(new Date())).append(r.nextInt(100)).append(suffixName);
         String newFileName = tempName.toString();
-        File fileDirectory = new File(Constants.FILE_UPLOAD_DIC);
+        String fileUploadDic = Constants.FILE_UPLOAD_DIC;
+        if (System.getProperty("os.name").indexOf("Windows") != -1) {
+            // windows 系统
+            fileUploadDic = "D://"+fileUploadDic;
+        }
+        File fileDirectory = new File(fileUploadDic);
         //创建文件
-        File destFile = new File(Constants.FILE_UPLOAD_DIC + newFileName);
+        File destFile = new File(fileUploadDic+ newFileName);
+
         try {
             if (!fileDirectory.exists()) {
-                if (!fileDirectory.mkdir()) {
+                if (!fileDirectory.mkdirs()) {
                     throw new IOException("文件夹创建失败,路径为：" + fileDirectory);
                 }
             }
+            System.out.println("上传文件路径"+destFile);
             file.transferTo(destFile);
             Result resultSuccess = ResultGenerator.genSuccessResult();
             resultSuccess.setData(MyBlogUtils.getHost(new URI(httpServletRequest.getRequestURL() + "")) + "/upload/" + newFileName);

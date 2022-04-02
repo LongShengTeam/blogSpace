@@ -50,6 +50,9 @@ public class AdminController {
                         @RequestParam("password") String password,
                         @RequestParam("verifyCode") String verifyCode,
                         HttpSession session) {
+        System.out.println(userName);
+        System.out.println(password);
+        System.out.println(verifyCode);
         if (StringUtils.isEmpty(verifyCode)) {
             session.setAttribute("errorMsg", "验证码不能为空");
             return "admin/login";
@@ -58,6 +61,7 @@ public class AdminController {
             session.setAttribute("errorMsg", "用户名或密码不能为空");
             return "admin/login";
         }
+        //验证码校验
         String kaptchaCode = session.getAttribute("verifyCode") + "";
         if (StringUtils.isEmpty(kaptchaCode) || !verifyCode.equals(kaptchaCode)) {
             session.setAttribute("errorMsg", "验证码错误");

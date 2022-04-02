@@ -26,6 +26,7 @@ public class CommonController {
         try {
             //生产验证码字符串并保存到session中
             String verifyCode = captchaProducer.createText();
+            System.out.println("verifyCode验证码==>"+verifyCode);
             httpServletRequest.getSession().setAttribute("verifyCode", verifyCode);
             BufferedImage challenge = captchaProducer.createImage(verifyCode);
             ImageIO.write(challenge, "jpg", imgOutputStream);

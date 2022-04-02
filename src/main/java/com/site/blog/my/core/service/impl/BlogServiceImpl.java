@@ -191,6 +191,7 @@ public class BlogServiceImpl implements BlogService {
         //每页8条
         params.put("limit", 8);
         params.put("blogStatus", 1);//过滤发布状态下的数据
+        //这个是map
         PageQueryUtil pageUtil = new PageQueryUtil(params);
         List<Blog> blogList = blogMapper.findBlogList(pageUtil);
         List<BlogListVO> blogListVOS = getBlogListVOsByBlogs(blogList);
