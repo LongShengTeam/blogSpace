@@ -6,72 +6,56 @@
 <div th:replace="blog/amaze/header::header-fragment"></div>
 <div class="am-g am-g-fixed blog-fixed">
     <div class="am-u-lg-8 am-u-sm-12">
-        <main class="links-list">
-            <th:block th:unless="${#lists.isEmpty(favoriteLinks)}">
-                <div class="title">
-                    <h3>友链</h3>
-                </div>
-                <div class="list">
-                    <ul>
-                        <th:block th:each="favoriteLink : ${favoriteLinks}">
-                            <li><a th:href="@{${favoriteLink.linkUrl}}"
-                                   th:text="${favoriteLink.linkName}">友链</a>
-                                -
-                                <th:block th:text="${favoriteLink.linkDescription}"></th:block>
-                            </li>
-                        </th:block>
-                    </ul>
-                </div>
-            </th:block>
-            <th:block th:unless="${#lists.isEmpty(recommendLinks)}">
-                <div class="title">
-                    <h3>推荐网站</h3>
-                </div>
-                <div class="list">
-                    <ul>
-                        <th:block th:each="recommendLink : ${recommendLinks}">
-                            <li><a th:href="@{${recommendLink.linkUrl}}" th:text="${recommendLink.linkName}">推荐网站</a>
-                                -
-                                <th:block th:text="${recommendLink.linkDescription}"></th:block>
-                            </li>
-                        </th:block>
-                    </ul>
-                </div>
-            </th:block>
-            <th:block th:unless="${#lists.isEmpty(personalLinks)}">
-                <div class="title">
-                    <h3>个人链接</h3>
-                </div>
-                <div class="list">
-                    <ul>
-                        <th:block th:each="personalLink : ${personalLinks}">
-                            <li><a th:href="@{${personalLink.linkUrl}}"
-                                   th:text="${personalLink.linkName}">个人链接</a>
-                                -
-                                <th:block th:text="${personalLink.linkDescription}"></th:block>
-                            </li>
-                        </th:block>
-                    </ul>
-                </div>
-            </th:block>
-            <h2 id="个人链接">链接须知</h2>
-            <p>欢迎互换友链 ^_^ 不过请确定贵站可以正常运营.</p>
-            <p>我的邮箱是
-                <th:block th:text="${configurations.get('yourEmail')}"></th:block>
-                , 格式要求如下:
-            </p>
-            <ul>
-                <li>网站名称：13blog</li>
-                <li>网站链接：http://hanf666666.top:9999</li>
-                <li>网站描述：hanf666666的个人博客</li>
-            </ul>
+            <h1>选择题</h1>
+            <form id="myForm">
+                <br><br>
+                <label  th:text="${question.question}">题目：</label>
+                选项：<br>
+                <input type="hidden" name="id" th:value="${question.id}"><br>
+                <hr></hr>
+                A.<input type="checkbox" name="answerList" value="A" th:text="${question.A}"><br>
+                <hr> </hr>
+                B.<input type="checkbox" name="answerList" value="B" th:text="${question.B}"><br>
+                <hr> </hr>
+                C.<input type="checkbox" name="answerList" value="C" th:text="${question.C}"><br>
+                <hr> </hr>
+                D.<input type="checkbox" name="answerList" value="D" th:text="${question.D}"><br>
+                <hr></hr>
+                E.<input type="checkbox" name="answerList" value="E" th:text="${question.E}"><br>
+                <button type="button" id="submitBtn">提交</button>
+            </form>
+        <a th:href="@{/problem/next(id=${question.id-1})}">上一题</a><br><br>
+        <div id="result"></div>
+        <a th:href="@{/problem/next(id=${question.id+1})}">下一题</a><br><br>
 
-            <p>请保证自己的链接长期有效,不然可能会被清理.</p>
 
-        </main>
     </div>
 </div>
 <!-- 引入页脚footer-fragment -->
 <footer th:replace="blog/amaze/footer::footer-fragment"></footer>
+<script>
+    $(document).ready(function() {
+        $("#submitBtn").click(function() {
+            var id = $("input[name='id']").val();
+            var answerList = $("input[name='answerList']:checked").map(function() {
+                return $(this).val();
+            }).get().join(",");
+
+            $.ajax({
+                url: "/problem/next2",
+                type: "POST",
+                contentType:"application/json;charset:utf-8",
+                data:JSON.stringify( { id: id,answerList:answerList.split(",") }),
+                success: function(data) {
+                    $("#result").text(data);
+                },
+                error: function() {
+                    $("#result").text("提交失败！");
+                }
+            });
+        });
+    });
+</script>
+
 </body>
 </html>

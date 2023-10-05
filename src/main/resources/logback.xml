@@ -23,7 +23,7 @@
 
 
     <!-- com.newsfeatures 为info级别 -->
-    <logger name="com.newsfeatures" level="INFO"/>
+    <logger name="com" level="INFO"/>
 
     <!-- 日志级别 -->
     <root level="warn">

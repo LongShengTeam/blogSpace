@@ -189,7 +189,7 @@ public class BlogServiceImpl implements BlogService {
         Map params = new HashMap();
         params.put("page", page);
         //每页8条
-        params.put("limit", 8);
+        params.put("limit", 3);
         params.put("blogStatus", 1);//过滤发布状态下的数据
         //这个是map
         PageQueryUtil pageUtil = new PageQueryUtil(params);
