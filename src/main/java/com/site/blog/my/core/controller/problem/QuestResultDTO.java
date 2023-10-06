@@ -14,4 +14,6 @@ import java.util.List;
 public class QuestResultDTO {
     private Integer id;
     private List<String> answerList;
+    private Integer type;
+    private String userName;
 }

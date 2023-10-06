@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.ToString;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -23,5 +24,8 @@ public class Question {
     private String C="";
     private String D="";
     private String E="";
+    private Boolean error;
+    private Boolean done=false;
+
 
 }

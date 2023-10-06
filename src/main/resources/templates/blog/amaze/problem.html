@@ -6,27 +6,50 @@
 <div th:replace="blog/amaze/header::header-fragment"></div>
 <div class="am-g am-g-fixed blog-fixed">
     <div class="am-u-lg-8 am-u-sm-12">
-            <h1>选择题</h1>
-            <form id="myForm">
-                <br><br>
-                <label  th:text="${question.question}">题目：</label>
-                选项：<br>
-                <input type="hidden" name="id" th:value="${question.id}"><br>
-                <hr></hr>
-                A.<input type="checkbox" name="answerList" value="A" th:text="${question.A}"><br>
-                <hr> </hr>
-                B.<input type="checkbox" name="answerList" value="B" th:text="${question.B}"><br>
-                <hr> </hr>
-                C.<input type="checkbox" name="answerList" value="C" th:text="${question.C}"><br>
-                <hr> </hr>
-                D.<input type="checkbox" name="answerList" value="D" th:text="${question.D}"><br>
-                <hr></hr>
-                E.<input type="checkbox" name="answerList" value="E" th:text="${question.E}"><br>
-                <button type="button" id="submitBtn">提交</button>
-            </form>
-        <a th:href="@{/problem/next(id=${question.id-1})}">上一题</a><br><br>
+        <select id="mySelect">
+            <option value="111" autocomplete="off">用户</option>
+            <option value="qyx" th:selected="${userName == 'qyx'}"  autocomplete="off">覃玉雪</option>
+            <option value="qhh" th:selected="${userName == 'qhh'}" autocomplete="off">覃鸿鹄</option>
+        </select>
+        <div th:text="${type}"></div>
+        <select id="mymoni">
+            <option value="222"  autocomplete="off">题类型</option>
+            <option value="1" th:selected="${type == 1}"  autocomplete="off">顺序</option>
+            <option value="2" th:selected="${type == 2}"  autocomplete="off">随机</option>
+            <option value="3" th:selected="${type == 3}"  autocomplete="off">模拟100题</option>
+            <option value="4" th:selected="${type == 4}"  autocomplete="off">错题</option>
+        </select>
+        <h1>选择题</h1>
+        <form id="myForm">
+
+            <br>
+            <label th:text="${question.question}">题目：</label>
+            选项：<br>
+            <input type="hidden" name="id" th:value="${question.id}"><br>
+            <label case="display: inline-block;margin-right: 10px;">
+                <input type="checkbox" name="answerList" value="A" th:text="${question.A}">
+            </label>
+            <label case="display: inline-block;margin-right: 10px;">
+                <input type="checkbox" name="answerList" value="B" th:text="${question.B}">
+            </label>
+            <label style="display: inline-block;margin-right: 10px;">
+                <input type="checkbox" name="answerList" value="C" th:text="${question.C}">
+            </label>
+            <div th:if="${question.D != ''}">
+                <label style="display: inline-block;margin-right: 10px;">
+                    <input type="checkbox" name="answerList" value="D" th:text="${question.D}">
+                </label>
+            </div>
+            <div th:if="${question.E != ''}">
+                <label style="display: inline-block;margin-right: 10px;">
+                    <input type="checkbox" name="answerList" value="E" th:text="${question.E}">
+                </label>
+            </div>
+            <button type="button" id="submitBtn" style=" text-align: right">提交</button>
+        </form>
+        <button type="button" id="submitBtn1" style=" text-align: right">上一题</button>
         <div id="result"></div>
-        <a th:href="@{/problem/next(id=${question.id+1})}">下一题</a><br><br>
+        <button type="button" id="submitBtn2" style=" text-align: right">下一题</button>
 
 
     </div>
@@ -34,26 +57,60 @@
 <!-- 引入页脚footer-fragment -->
 <footer th:replace="blog/amaze/footer::footer-fragment"></footer>
 <script>
-    $(document).ready(function() {
-        $("#submitBtn").click(function() {
+    $(document).ready(function () {
+        $("#submitBtn").click(function () {
             var id = $("input[name='id']").val();
-            var answerList = $("input[name='answerList']:checked").map(function() {
+            var answerList = $("input[name='answerList']:checked").map(function () {
                 return $(this).val();
             }).get().join(",");
+            var select = document.getElementById("mySelect");
+            var userName = select.options[select.selectedIndex].value;
+            var mymoni = document.getElementById("mymoni");
+            var type = mymoni.options[select.selectedIndex].value;
 
             $.ajax({
                 url: "/problem/next2",
-                type: "POST",
-                contentType:"application/json;charset:utf-8",
-                data:JSON.stringify( { id: id,answerList:answerList.split(",") }),
-                success: function(data) {
+                type: "post",
+                contentType: "application/json;charset:utf-8",
+                data: JSON.stringify({
+                    id: id,
+                    answerList: answerList.split(","),
+                    userName:userName,
+                    type:type
+                }),
+                success: function (data) {
                     $("#result").text(data);
                 },
-                error: function() {
+                error: function () {
                     $("#result").text("提交失败！");
                 }
             });
         });
+        $("#submitBtn1").click(function () {
+            var id = $("input[name='id']").val();
+            var select = document.getElementById("mySelect");
+            var userName = select.options[select.selectedIndex].value;
+
+            var mymoni = document.getElementById("mymoni");
+            var type = mymoni.options[mymoni.selectedIndex].value;
+            window.location.href="/problem/next3?userName="+userName+"&type="+type+"&id="+(parseInt(id)-1)
+
+        });
+        $("#submitBtn2").click(function () {
+            var id = $("input[name='id']").val();
+            var select = document.getElementById("mySelect");
+            var userName = select.options[select.selectedIndex].value;
+            var mymoni = document.getElementById("mymoni");
+            var type = mymoni.options[mymoni.selectedIndex].value;
+            window.location.href="/problem/next3?userName="+userName+"&type="+type+"&id="+(parseInt(id)+1)
+
+        });
+
+
+
+
+
+
     });
 </script>
 
