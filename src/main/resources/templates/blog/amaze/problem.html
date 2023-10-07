@@ -8,16 +8,19 @@
     <div class="am-u-lg-8 am-u-sm-12">
         <select id="mySelect">
             <option value="111" autocomplete="off">用户</option>
-            <option value="qyx" th:selected="${userName == 'qyx'}"  autocomplete="off">覃玉雪</option>
+            <option value="qyx" th:selected="${userName == 'qyx'}" autocomplete="off">覃玉雪</option>
             <option value="qhh" th:selected="${userName == 'qhh'}" autocomplete="off">覃鸿鹄</option>
+            <option value="qhh" th:selected="${userName == 'q11'}" autocomplete="off">覃11</option>
+            <option value="qhh" th:selected="${userName == 'q22'}" autocomplete="off">覃22</option>
+            <option value="qhh" th:selected="${userName == 'q33'}" autocomplete="off">覃33</option>
         </select>
         <div th:text="${type}"></div>
         <select id="mymoni">
-            <option value="222"  autocomplete="off">题类型</option>
-            <option value="1" th:selected="${type == 1}"  autocomplete="off">顺序</option>
-            <option value="2" th:selected="${type == 2}"  autocomplete="off">随机</option>
-            <option value="3" th:selected="${type == 3}"  autocomplete="off">模拟100题</option>
-            <option value="4" th:selected="${type == 4}"  autocomplete="off">错题</option>
+            <option value="222" autocomplete="off">题类型</option>
+            <option value="1" th:selected="${type == 1}" autocomplete="off">顺序</option>
+            <option value="2" th:selected="${type == 2}" autocomplete="off">随机</option>
+            <option value="3" th:selected="${type == 3}" autocomplete="off">模拟100题</option>
+            <option value="4" th:selected="${type == 4}" autocomplete="off">错题</option>
         </select>
         <h1>选择题</h1>
         <form id="myForm">
@@ -32,9 +35,11 @@
             <label case="display: inline-block;margin-right: 10px;">
                 <input type="checkbox" name="answerList" value="B" th:text="${question.B}">
             </label>
-            <label style="display: inline-block;margin-right: 10px;">
-                <input type="checkbox" name="answerList" value="C" th:text="${question.C}">
-            </label>
+            <div th:if="${question.C != ''}">
+                <label style="display: inline-block;margin-right: 10px;">
+                    <input type="checkbox" name="answerList" value="C" th:text="${question.C}">
+                </label>
+            </div>
             <div th:if="${question.D != ''}">
                 <label style="display: inline-block;margin-right: 10px;">
                     <input type="checkbox" name="answerList" value="D" th:text="${question.D}">
@@ -65,18 +70,19 @@
             }).get().join(",");
             var select = document.getElementById("mySelect");
             var userName = select.options[select.selectedIndex].value;
+
             var mymoni = document.getElementById("mymoni");
-            var type = mymoni.options[select.selectedIndex].value;
+            var type = mymoni.options[mymoni.selectedIndex].value;
 
             $.ajax({
-                url: "/problem/next2",
+                url: "/problem/answer",
                 type: "post",
                 contentType: "application/json;charset:utf-8",
                 data: JSON.stringify({
                     id: id,
                     answerList: answerList.split(","),
-                    userName:userName,
-                    type:type
+                    userName: userName,
+                    type: type
                 }),
                 success: function (data) {
                     $("#result").text(data);
@@ -93,7 +99,7 @@
 
             var mymoni = document.getElementById("mymoni");
             var type = mymoni.options[mymoni.selectedIndex].value;
-            window.location.href="/problem/next3?userName="+userName+"&type="+type+"&id="+(parseInt(id)-1)
+            window.location.href = "/problem/next3?userName=" + userName + "&type=" + type + "&id=" + (parseInt(id) - 1)
 
         });
         $("#submitBtn2").click(function () {
@@ -102,13 +108,9 @@
             var userName = select.options[select.selectedIndex].value;
             var mymoni = document.getElementById("mymoni");
             var type = mymoni.options[mymoni.selectedIndex].value;
-            window.location.href="/problem/next3?userName="+userName+"&type="+type+"&id="+(parseInt(id)+1)
+            window.location.href = "/problem/next3?userName=" + userName + "&type=" + type + "&id=" + (parseInt(id) + 1)
 
         });
-
-
-
-
 
 
     });
