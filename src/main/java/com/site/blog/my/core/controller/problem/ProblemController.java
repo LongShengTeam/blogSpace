@@ -161,9 +161,9 @@ public class ProblemController {
             questions = new ArrayList<Question>();
             errorMap.put(questResultDTO.getUserName(), questions);
         }
+        result = new AtomicReference<>("答对:" + question.getAnswerList());
         switch (questResultDTO.getType()) {
             case 1:
-                result = new AtomicReference<>("答对:" + question.getAnswerList());
                 List<Question> finalQuestions = questions;
                 AtomicReference<String> finalResult = result;
                 Question finalQuestion = question;
@@ -182,7 +182,6 @@ public class ProblemController {
                 });
                 break;
             case 2:
-                result = new AtomicReference<>("答对:" + question.getAnswerList());
                 List<Question> finalQuestions2 = questions;
                 AtomicReference<String> finalResult2 = result;
                 Question finalQuestion1 = question;
@@ -243,7 +242,6 @@ public class ProblemController {
                 finalResult3.set(finalResult3.get() + s);
                 break;
             case 4:
-                result = new AtomicReference<>("答对:" + question.getAnswerList());
                 List<Question> finalQuestions4 = questions;
                 AtomicReference<String> finalResult4 = result;
                 Question finalQuestion3 = question;
