@@ -26,28 +26,28 @@
         <form id="myForm">
 
             <br>
-            <label th:text="${question.question}">题目：</label>
+            <label th:text="${question.questionDesc}">题目：</label>
             选项：<br>
             <input type="hidden" name="id" th:value="${question.id}"><br>
             <label case="display: inline-block;margin-right: 10px;">
-                <input type="checkbox" name="answerList" value="A" th:text="${question.A}">
+                <input type="checkbox" name="answerList" value="A" th:text="${question.option1}">
             </label>
             <label case="display: inline-block;margin-right: 10px;">
-                <input type="checkbox" name="answerList" value="B" th:text="${question.B}">
+                <input type="checkbox" name="answerList" value="B" th:text="${question.option2}">
             </label>
-            <div th:if="${question.C != ''}">
+            <div th:if="${question.option3 != ''}">
                 <label style="display: inline-block;margin-right: 10px;">
-                    <input type="checkbox" name="answerList" value="C" th:text="${question.C}">
+                    <input type="checkbox" name="answerList" value="C" th:text="${question.option3}">
                 </label>
             </div>
-            <div th:if="${question.D != ''}">
+            <div th:if="${question.option4 != ''}">
                 <label style="display: inline-block;margin-right: 10px;">
-                    <input type="checkbox" name="answerList" value="D" th:text="${question.D}">
+                    <input type="checkbox" name="answerList" value="D" th:text="${question.option4}">
                 </label>
             </div>
-            <div th:if="${question.E != ''}">
+            <div th:if="${question.option5 != ''}">
                 <label style="display: inline-block;margin-right: 10px;">
-                    <input type="checkbox" name="answerList" value="E" th:text="${question.E}">
+                    <input type="checkbox" name="answerList" value="E" th:text="${question.option5}">
                 </label>
             </div>
             <button type="button" id="submitBtn" style=" text-align: right">提交</button>

@@ -2,6 +2,7 @@ package com.site.blog.my.core.controller.problem;
 
 import cn.hutool.core.io.resource.ResourceUtil;
 import com.site.blog.my.core.controller.problem.data.QuestionVO;
+import com.site.blog.my.core.entity.Question;
 import com.site.blog.my.core.service.ConfigService;
 import com.site.blog.my.core.service.LinkService;
 import com.site.blog.my.core.service.QuestionService;
@@ -44,11 +45,10 @@ public class ProblemController {
 
         log.info("刷题日志");
         request.setAttribute("pageName", "友情链接");
-        HashMap<Integer, QuestionVO> questionHashMap = fenxiData();
-
+        Question question = questionService.getBaseMapper().selectById(id);
 //        request.setAttribute("tiMap", tiMap);
-        request.setAttribute("question", questionService.getBaseMapper().selectById(id));
-        log.info("---->{}", questionHashMap.get(id));
+        request.setAttribute("question",question );
+        log.info("---->{}", question);
 //        ArrayList arrayList = new ArrayList();
 //        arrayList.add("")
         request.setAttribute("name", "韩静");
