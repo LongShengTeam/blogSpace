@@ -3,6 +3,7 @@
   id BIGINT(25) PRIMARY KEY AUTO_INCREMENT,
   question_desc VARCHAR(2000) NOT NULL COMMENT '问题描述',
   question_type int(4) COMMENT '问题描述',
+  question_answer VARCHAR(20) COMMENT '问题答案',
   option1 VARCHAR(500) NOT NULL COMMENT '选项1',
   option2 VARCHAR(500) NOT NULL COMMENT '选项2',
   option3 VARCHAR(500)  COMMENT '选项3',

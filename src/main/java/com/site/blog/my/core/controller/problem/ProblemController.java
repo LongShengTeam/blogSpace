@@ -3,6 +3,7 @@ package com.site.blog.my.core.controller.problem;
 import cn.hutool.core.io.resource.ResourceUtil;
 import com.site.blog.my.core.service.ConfigService;
 import com.site.blog.my.core.service.LinkService;
+import com.site.blog.my.core.service.QuestionService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +17,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 
 @Controller
@@ -28,20 +28,25 @@ public class ProblemController {
     private ConfigService configService;
     @Resource
     private LinkService linkService;
+
+
+    @Resource
+    private QuestionService questionService;
+
     @Resource
     HttpServletRequest request;
-    private static HashMap<String, List<Question>> moniHashMap = new HashMap<>();
-    private static HashMap<String, List<Question>> errorMap = new HashMap<String, List<Question>>();
+    private static HashMap<String, List<QuestionVO>> moniHashMap = new HashMap<>();
+    private static HashMap<String, List<QuestionVO>> errorMap = new HashMap<String, List<QuestionVO>>();
 
     @GetMapping("/next")
     public String next(@RequestParam("id") Integer id) {
 
         log.info("刷题日志");
         request.setAttribute("pageName", "友情链接");
-        HashMap<Integer, Question> questionHashMap = fenxiData();
+        HashMap<Integer, QuestionVO> questionHashMap = fenxiData();
 
 //        request.setAttribute("tiMap", tiMap);
-        request.setAttribute("question", questionHashMap.get(id));
+        request.setAttribute("question", questionService.getBaseMapper().selectById(id));
         log.info("---->{}", questionHashMap.get(id));
 //        ArrayList arrayList = new ArrayList();
 //        arrayList.add("")
@@ -59,7 +64,7 @@ public class ProblemController {
         log.info("type-->{}", type);
         log.info("刷题日志");
         request.setAttribute("pageName", "友情链接");
-        HashMap<Integer, Question> questionHashMap = fenxiData();
+        HashMap<Integer, QuestionVO> questionHashMap = fenxiData();
 
 //        request.setAttribute("tiMap", tiMap);
 
@@ -68,19 +73,19 @@ public class ProblemController {
         switch (type) {
 //              <option value="1" th:selected="${type == 1}"  autocomplete="off">顺序</option>
             case 1:
-                request.setAttribute("question", questionHashMap.get(id));
+                request.setAttribute("question", questionService.getBaseMapper().selectById(id));
                 log.info("---->{}", questionHashMap.get(id));
                 break;
 //            <option value="2" th:selected="${type == 2}"  autocomplete="off">随机</option>
             case 2:
                 id = new Random().nextInt(2311);
                 log.info("---->{}", questionHashMap.get(id));
-                request.setAttribute("question", questionHashMap.get(id));
+                request.setAttribute("question", questionService.getBaseMapper().selectById(id));
                 break;
 //            <option value="3" th:selected="${type == 3}"  autocomplete="off">模拟100题</option>
             case 3:
-                List<Question> questionList = moniHashMap.get(userName);
-                List<Question> noDonecollect = null;
+                List<QuestionVO> questionList = moniHashMap.get(userName);
+                List<QuestionVO> noDonecollect = null;
 
                 if (questionList != null) {
                     Boolean done = true;
@@ -124,11 +129,11 @@ public class ProblemController {
                 break;
 //            <option value="4" th:selected="${type == 4}"  autocomplete="off">错题</option>
             case 4:
-                List<Question> errorQuestionList = errorMap.get("userName");
+                List<QuestionVO> errorQuestionList = errorMap.get("userName");
                 if (errorQuestionList != null) {
                     request.setAttribute("question", errorQuestionList.get(0));
                 } else {
-                    request.setAttribute("question", questionHashMap.get(id));
+                    request.setAttribute("question", questionService.getBaseMapper().selectById(id));
                 }
                 break;
 //
@@ -153,20 +158,20 @@ public class ProblemController {
     @ResponseBody
     public String answer(@RequestBody QuestResultDTO questResultDTO) {
         log.info("questResultDTO-->{}", questResultDTO);
-        HashMap<Integer, Question> questionHashMap = fenxiData();
-        Question question = questionHashMap.get(questResultDTO.getId());
-        List<Question> questions = errorMap.get(questResultDTO.getUserName());
+        HashMap<Integer, QuestionVO> questionHashMap = fenxiData();
+        QuestionVO question = questionHashMap.get(questResultDTO.getId());
+        List<QuestionVO> questions = errorMap.get(questResultDTO.getUserName());
         AtomicReference<String> result = null;
         if (questions == null) {
-            questions = new ArrayList<Question>();
+            questions = new ArrayList<QuestionVO>();
             errorMap.put(questResultDTO.getUserName(), questions);
         }
         result = new AtomicReference<>("答对:" + question.getAnswerList());
         switch (questResultDTO.getType()) {
             case 1:
-                List<Question> finalQuestions = questions;
+                List<QuestionVO> finalQuestions = questions;
                 AtomicReference<String> finalResult = result;
-                Question finalQuestion = question;
+                QuestionVO finalQuestion = question;
                 question.getAnswerList().forEach(k -> {
                     if (!questResultDTO.getAnswerList().contains(k)) {
                         finalQuestions.add(finalQuestion);
@@ -182,9 +187,9 @@ public class ProblemController {
                 });
                 break;
             case 2:
-                List<Question> finalQuestions2 = questions;
+                List<QuestionVO> finalQuestions2 = questions;
                 AtomicReference<String> finalResult2 = result;
-                Question finalQuestion1 = question;
+                QuestionVO finalQuestion1 = question;
                 question.getAnswerList().forEach(k -> {
                     if (!questResultDTO.getAnswerList().contains(k)) {
                         finalQuestions2.add(finalQuestion1);
@@ -201,9 +206,9 @@ public class ProblemController {
                 break;
             case 3:
                 //模拟答题
-                List<Question> moniQuestionList = moniHashMap.get(questResultDTO.getUserName());
-                Question finalQuestion4 = question;
-                List<Question> collect = moniQuestionList.parallelStream().filter(row -> row.getId().equals(finalQuestion4.getId())).collect(Collectors.toList());
+                List<QuestionVO> moniQuestionList = moniHashMap.get(questResultDTO.getUserName());
+                QuestionVO finalQuestion4 = question;
+                List<QuestionVO> collect = moniQuestionList.parallelStream().filter(row -> row.getId().equals(finalQuestion4.getId())).collect(Collectors.toList());
                 if(collect!=null && collect.size()>0){
                     question=collect.get(0);
                 }else{
@@ -214,11 +219,11 @@ public class ProblemController {
                 result = new AtomicReference<>(s);
 
 
-                List<Question> finalQuestions3 = questions;
+                List<QuestionVO> finalQuestions3 = questions;
                 AtomicReference<String> finalResult3 = result;
                 question.setError(false);
                 question.setDone(true);
-                Question finalQuestion2 = question;
+                QuestionVO finalQuestion2 = question;
                 question.getAnswerList().forEach(k -> {
                     if (!questResultDTO.getAnswerList().contains(k)) {
                         finalQuestion2.setError(true);
@@ -242,9 +247,9 @@ public class ProblemController {
                 finalResult3.set(finalResult3.get() + s);
                 break;
             case 4:
-                List<Question> finalQuestions4 = questions;
+                List<QuestionVO> finalQuestions4 = questions;
                 AtomicReference<String> finalResult4 = result;
-                Question finalQuestion3 = question;
+                QuestionVO finalQuestion3 = question;
                 question.getAnswerList().forEach(k -> {
                     if (!questResultDTO.getAnswerList().contains(k)) {
                         finalQuestions4.add(finalQuestion3);
@@ -269,9 +274,9 @@ public class ProblemController {
     }
 
 
-    private HashMap<Integer, Question> fenxiData() {
+    private HashMap<Integer, QuestionVO> fenxiData() {
         BufferedReader utf8Reader = ResourceUtil.getUtf8Reader("aaaa.sql");
-        HashMap<Integer, Question> questionHashMap = new HashMap<>();
+        HashMap<Integer, QuestionVO> questionHashMap = new HashMap<>();
         final Integer[] count = {1};
         utf8Reader.lines().forEach(row -> {
                     if (row.contains("第") && row.contains("页")) {
@@ -279,7 +284,7 @@ public class ProblemController {
                     } else {
                         if (count[0].toString().equals(row.split(" ")[0])) {
                             //问题
-                            Question question = new Question();
+                            QuestionVO question = new QuestionVO();
                             question.setQuestion(row);
                             question.setId(count[0]);
                             questionHashMap.put(count[0], question);
@@ -298,7 +303,7 @@ public class ProblemController {
                                 questionHashMap.get((count[0] - 1)).setE(row);
                             } else {
                                 //问题
-                                Question question = questionHashMap.get((count[0] - 1));
+                                QuestionVO question = questionHashMap.get((count[0] - 1));
                                 question.setQuestion(question.getQuestion() + row);
                             }
                         }

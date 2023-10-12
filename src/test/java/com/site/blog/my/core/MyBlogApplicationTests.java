@@ -22,22 +22,7 @@ import java.util.List;
 public class MyBlogApplicationTests {
 	@Resource
 	private AdminUserService adminUserService;
-	@Resource
-	private QuestionMapper questionMapper;
 
-	@Test
-	public  void demo(){
-		Question question = questionMapper.selectById(1L);
-		log.info("question--->{}",question);
-		Question question2=new Question();
-		question2.setQuestionDesc("11");
-		question2.setQuestionType(1);
-		question2.setOption1("11");
-		question2.setOption2("11");
-		questionMapper.insert(question2);
-
-
-	}
 	@Test
 	public void contextLoads() {
 	}

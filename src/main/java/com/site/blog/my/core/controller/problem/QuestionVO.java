@@ -15,7 +15,7 @@ import java.util.List;
  */
 @Data
 @ToString
-public class Question {
+public class QuestionVO {
     private Integer id;
     private String question="";
     private List<String> answerList=new ArrayList<>();

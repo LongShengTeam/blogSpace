@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.site.blog.my.core.dao.QuestionMapper">
+
+    <resultMap id="BaseResultMap" type="com.site.blog.my.core.entity.Question">
+            <id property="id" column="id" jdbcType="BIGINT"/>
+            <result property="questionDesc" column="question_desc" jdbcType="VARCHAR"/>
+            <result property="questionType" column="question_type" jdbcType="INTEGER"/>
+            <result property="questionAnswer" column="question_answer" jdbcType="VARCHAR"/>
+            <result property="option1" column="option1" jdbcType="VARCHAR"/>
+            <result property="option2" column="option2" jdbcType="VARCHAR"/>
+            <result property="option3" column="option3" jdbcType="VARCHAR"/>
+            <result property="option4" column="option4" jdbcType="VARCHAR"/>
+            <result property="option5" column="option5" jdbcType="VARCHAR"/>
+            <result property="option6" column="option6" jdbcType="VARCHAR"/>
+            <result property="answerErrorCount" column="answer_error_count" jdbcType="BIGINT"/>
+            <result property="answercount" column="answerCount" jdbcType="BIGINT"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,question_desc,question_type,
+        question_answer,option1,option2,
+        option3,option4,option5,
+        option6,answer_error_count,answerCount
+    </sql>
+</mapper>
