@@ -5,18 +5,18 @@
 <mapper namespace="com.site.blog.my.core.mapper.QuestionMapper">
 
     <resultMap id="BaseResultMap" type="com.site.blog.my.core.entity.Question">
-            <id property="id" column="id" jdbcType="BIGINT"/>
-            <result property="questionDesc" column="question_desc" jdbcType="VARCHAR"/>
-            <result property="questionType" column="question_type" jdbcType="INTEGER"/>
-            <result property="questionAnswer" column="question_answer" jdbcType="VARCHAR"/>
-            <result property="option1" column="option1" jdbcType="VARCHAR"/>
-            <result property="option2" column="option2" jdbcType="VARCHAR"/>
-            <result property="option3" column="option3" jdbcType="VARCHAR"/>
-            <result property="option4" column="option4" jdbcType="VARCHAR"/>
-            <result property="option5" column="option5" jdbcType="VARCHAR"/>
-            <result property="option6" column="option6" jdbcType="VARCHAR"/>
-            <result property="answerErrorCount" column="answer_error_count" jdbcType="BIGINT"/>
-            <result property="answercount" column="answerCount" jdbcType="BIGINT"/>
+        <id property="id" column="id" jdbcType="BIGINT"/>
+        <result property="questionDesc" column="question_desc" jdbcType="VARCHAR"/>
+        <result property="questionType" column="question_type" jdbcType="INTEGER"/>
+        <result property="questionAnswer" column="question_answer" jdbcType="VARCHAR"/>
+        <result property="option1" column="option1" jdbcType="VARCHAR"/>
+        <result property="option2" column="option2" jdbcType="VARCHAR"/>
+        <result property="option3" column="option3" jdbcType="VARCHAR"/>
+        <result property="option4" column="option4" jdbcType="VARCHAR"/>
+        <result property="option5" column="option5" jdbcType="VARCHAR"/>
+        <result property="option6" column="option6" jdbcType="VARCHAR"/>
+        <result property="answerErrorCount" column="answer_error_count" jdbcType="BIGINT"/>
+        <result property="answercount" column="answerCount" jdbcType="BIGINT"/>
     </resultMap>
 
     <sql id="Base_Column_List">
@@ -25,4 +25,8 @@
         option3,option4,option5,
         option6,answer_error_count,answerCount
     </sql>
+    <select id="getRandomQuestion" resultMap="BaseResultMap">
+               select * from question where question_answer !='[]' order by rand() limit 1
+
+    </select>
 </mapper>

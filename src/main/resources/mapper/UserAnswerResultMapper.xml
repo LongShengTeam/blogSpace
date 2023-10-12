@@ -21,6 +21,9 @@
         select * from user_answer_result where user_name=#{userName} and question_id=#{id}
     </select>
     <select id="selectErrorQuestion" resultMap="BaseResultMap">
-        select * from user_answer_result where user_name=#{userName} and answer_last_result=1 order by rand() limit 1
+        select * from user_answer_result r
+        left join  question q on r.question_id=q.id
+        where q.question_answer !='[]' and r.user_name=#{userName} and r.answer_last_result=1
+        order by rand() limit 1
     </select>
 </mapper>

@@ -70,6 +70,7 @@ public class ProblemController {
 
         request.setAttribute("userName", userName);
         request.setAttribute("type", type);
+
         switch (type) {
 //              <option value="1" th:selected="${type == 1}"  autocomplete="off">顺序</option>
             case 1:
@@ -78,8 +79,8 @@ public class ProblemController {
                 break;
 //            <option value="2" th:selected="${type == 2}"  autocomplete="off">随机</option>
             case 2:
-                id = Long.valueOf(new Random().nextInt(2311));
-                log.info("---->{}", questionService.getBaseMapper().selectById(id));
+
+                log.info("---->{}", questionService.getRandomQuestion());
                 request.setAttribute("question", questionService.getBaseMapper().selectById(id));
                 break;
 //            <option value="3" th:selected="${type == 3}"  autocomplete="off">模拟100题</option>
@@ -94,10 +95,9 @@ public class ProblemController {
                         questionList = new ArrayList<>();
                         List<Long> objects = new ArrayList<>();
                         while (questionList.size() < 100) {
-                            id = Long.valueOf(new Random().nextInt(2311));
+                            Question question = questionService.getRandomQuestion();
+                            id = question.getId();
                             if (!objects.contains(id)) {
-                                objects.add(id);
-                                Question question = questionService.getBaseMapper().selectById(id);
                                 SimulationVO simulationVO = new SimulationVO();
                                 simulationVO.setId(question.getId());
                                 simulationVO.setQuestionDesc(question.getQuestionDesc());
@@ -111,6 +111,7 @@ public class ProblemController {
                                 simulationVO.setOption5(question.getOption5());
                                 simulationVO.setOption6(question.getOption6());
                                 questionList.add(simulationVO);
+                                objects.add(id);
                             }
 
                         }
@@ -180,7 +181,7 @@ public class ProblemController {
     @ResponseBody
     public String answer(@RequestBody QuestResultDTO questResultDTO) {
         log.info("questResultDTO-->{}", questResultDTO);
-        Question question = questionService.getBaseMapper().selectById(questResultDTO.getId());
+        Question questionQuery = questionService.getBaseMapper().selectById(questResultDTO.getId());
         UserAnswerResult userAnswerResult = userAnswerResultService.selectUserInfo(questResultDTO);
         if (Objects.isNull(userAnswerResult)) {
             userAnswerResult = new UserAnswerResult();
@@ -193,7 +194,7 @@ public class ProblemController {
         }
         userAnswerResult.setAnswerCount(userAnswerResult.getAnswerCount() + 1);
         List<String> answerDTOList = questResultDTO.getAnswerList();
-        String answerQueryStr = question.getQuestionAnswer().replaceAll("\\[", "").replaceAll("\\]", "").replaceAll(" ", "");
+        String answerQueryStr = questionQuery.getQuestionAnswer().replaceAll("\\[", "").replaceAll("\\]", "").replaceAll(" ", "");
         String result = "答对:" + answerQueryStr;
         List<String> answerQueryList = Arrays.asList(answerQueryStr.split(","));
         Boolean aBoolean = false;
@@ -201,7 +202,7 @@ public class ProblemController {
             case 1:
                 aBoolean = compareAnswers(answerDTOList, answerQueryList);
                 if (!aBoolean) {
-                    result = "答错:正确答案是" + answerDTOList.toString();
+                    result = "答错:正确答案是" + answerQueryList.toString();
                     userAnswerResult.setAnswerErrorCount(userAnswerResult.getAnswerErrorCount() + 1);
                     userAnswerResult.setAnswerLastResult(1);
                 } else {
@@ -212,7 +213,7 @@ public class ProblemController {
             case 2:
                 aBoolean = compareAnswers(answerDTOList, answerQueryList);
                 if (!aBoolean) {
-                    result = "答错:正确答案是" + answerDTOList.toString();
+                    result = "答错:正确答案是" + answerQueryList.toString();
                     userAnswerResult.setAnswerErrorCount(userAnswerResult.getAnswerErrorCount() + 1);
                     userAnswerResult.setAnswerLastResult(1);
                 } else {
@@ -228,14 +229,14 @@ public class ProblemController {
                 if (collect != null && collect.size() > 0) {
                     simulationVO = collect.get(0);
                 } else {
-                    log.error("question--->{}", question);
+                    log.error("question--->{}", questionQuery);
                     log.error("moniQuestionList--->{}", moniQuestionList);
                 }
                 simulationVO.setError(false);
                 simulationVO.setDone(true);
                 aBoolean = compareAnswers(answerDTOList, answerQueryList);
                 if (!aBoolean) {
-                    result = "答错:正确答案是" + answerDTOList.toString();
+                    result = "答错:正确答案是" + answerQueryList.toString();
                     userAnswerResult.setAnswerErrorCount(userAnswerResult.getAnswerErrorCount() + 1);
                     userAnswerResult.setAnswerLastResult(1);
                     simulationVO.setError(true);
@@ -252,7 +253,7 @@ public class ProblemController {
             case 4:
                 aBoolean = compareAnswers(answerDTOList, answerQueryList);
                 if (!aBoolean) {
-                    result = "答错:正确答案是" + answerDTOList.toString();
+                    result = "答错:正确答案是" + answerQueryList.toString();
                     userAnswerResult.setAnswerErrorCount(userAnswerResult.getAnswerErrorCount() + 1);
                     userAnswerResult.setAnswerLastResult(1);
                 } else {

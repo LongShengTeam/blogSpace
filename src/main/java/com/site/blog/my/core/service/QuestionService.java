@@ -8,4 +8,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface QuestionService extends IService<Question> {
 
+    Question getRandomQuestion();
 }
