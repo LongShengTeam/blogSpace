@@ -1,7 +1,10 @@
 package com.site.blog.my.core;
 
 import cn.hutool.core.io.resource.ResourceUtil;
+import com.site.blog.my.core.entity.Question;
+import com.site.blog.my.core.dao.QuestionMapper;
 import com.site.blog.my.core.service.AdminUserService;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -14,10 +17,27 @@ import java.util.HashMap;
 import java.util.List;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@Slf4j
 public class MyBlogApplicationTests {
 	@Resource
 	private AdminUserService adminUserService;
+	@Resource
+	private QuestionMapper questionMapper;
+
+	@Test
+	public  void demo(){
+		Question question = questionMapper.selectById(1L);
+		log.info("question--->{}",question);
+		Question question2=new Question();
+		question2.setQuestionDesc("11");
+		question2.setQuestionType(1);
+		question2.setOption1("11");
+		question2.setOption2("11");
+		questionMapper.insert(question2);
+
+
+	}
 	@Test
 	public void contextLoads() {
 	}
