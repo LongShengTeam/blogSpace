@@ -1,7 +1,7 @@
 package com.site.blog.my.core.controller.problem;
 
 import cn.hutool.core.io.resource.ResourceUtil;
-import com.site.blog.my.core.controller.problem.data.QuestionVO;
+import com.site.blog.my.core.process.data.ProcessingQuestion;
 import com.site.blog.my.core.dao.QuestionMapper;
 import com.site.blog.my.core.entity.Question;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +36,7 @@ class ProblemControllerTest {
 
     @Test
     public  void demo(){
-        HashMap<Integer, QuestionVO> integerQuestionHashMap = fenxiData();
+        HashMap<Long, ProcessingQuestion> integerQuestionHashMap = fenxiData();
         integerQuestionHashMap.forEach((k,v)->{
             Question question = new Question();
             question.setId(0L);
@@ -55,17 +55,17 @@ class ProblemControllerTest {
 
     }
 
-    private HashMap<Integer, QuestionVO> fenxiData() {
+    private HashMap<Long, ProcessingQuestion> fenxiData() {
         BufferedReader utf8Reader = ResourceUtil.getUtf8Reader("aaaa.sql");
-        HashMap<Integer, QuestionVO> questionHashMap = new HashMap<>();
-        final Integer[] count = {1};
+        HashMap<Long, ProcessingQuestion> questionHashMap = new HashMap<>();
+        final Long[] count = {1L};
         utf8Reader.lines().forEach(row -> {
                     if (row.contains("第") && row.contains("页")) {
 
                     } else {
                         if (count[0].toString().equals(row.split(" ")[0])) {
                             //问题
-                            QuestionVO question = new QuestionVO();
+                            ProcessingQuestion question = new ProcessingQuestion();
                             question.setQuestion(row);
                             question.setId(count[0]);
                             questionHashMap.put(count[0], question);
@@ -84,7 +84,7 @@ class ProblemControllerTest {
                                 questionHashMap.get((count[0] - 1)).setE(row);
                             } else {
                                 //问题
-                                QuestionVO question = questionHashMap.get((count[0] - 1));
+                                ProcessingQuestion question = questionHashMap.get((count[0] - 1));
                                 question.setQuestion(question.getQuestion() + row);
                             }
                         }

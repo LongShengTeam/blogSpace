@@ -12,7 +12,7 @@ import java.util.List;
  */
 @Data
 public class QuestResultDTO {
-    private Integer id;
+    private Long id;
     private List<String> answerList;
     private Integer type;
     private String userName;

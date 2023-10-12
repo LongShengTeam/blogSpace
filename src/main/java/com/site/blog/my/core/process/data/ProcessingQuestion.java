@@ -1,10 +1,9 @@
-package com.site.blog.my.core.controller.problem.data;
+package com.site.blog.my.core.process.data;
 
 import lombok.Data;
 import lombok.ToString;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -15,8 +14,8 @@ import java.util.List;
  */
 @Data
 @ToString
-public class QuestionVO {
-    private Integer id;
+public class ProcessingQuestion {
+    private Long id;
     private String question="";
     private List<String> answerList=new ArrayList<>();
     private String A="";
