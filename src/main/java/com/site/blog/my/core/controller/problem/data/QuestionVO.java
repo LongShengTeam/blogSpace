@@ -1,4 +1,4 @@
-package com.site.blog.my.core.controller.problem;
+package com.site.blog.my.core.controller.problem.data;
 
 import lombok.Data;
 import lombok.ToString;
@@ -9,7 +9,7 @@ import java.util.List;
 
 /**
  * to do
- *
+ * 数据处理对象
  * @author Hj
  * @date 2023/10/5
  */
