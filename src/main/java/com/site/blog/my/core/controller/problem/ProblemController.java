@@ -158,7 +158,7 @@ public class ProblemController {
                 // 错题 下一个
                 UserAnswerResult userAnswerResult = userAnswerResultService.selectErrorQuestion(userName);
                 if (userAnswerResult != null) {
-                    request.setAttribute("question", questionService.getBaseMapper().selectById(userAnswerResult.getId()));
+                    request.setAttribute("question", questionService.getBaseMapper().selectById(userAnswerResult.getQuestionId()));
                 } else {
                     request.setAttribute("question", questionService.getBaseMapper().selectById(id));
                 }
@@ -188,11 +188,14 @@ public class ProblemController {
             userAnswerResult.setQuestionId(questResultDTO.getId());
             userAnswerResult.setAnswerErrorCount(0L);
             userAnswerResult.setAnswerCount(0L);
+            userAnswerResultService.getBaseMapper().insert(userAnswerResult);
+            userAnswerResult = userAnswerResultService.selectUserInfo(questResultDTO);
         }
         userAnswerResult.setAnswerCount(userAnswerResult.getAnswerCount() + 1);
-        String result = "答对:" + question.getQuestionAnswer().toString();
         List<String> answerDTOList = questResultDTO.getAnswerList();
-        List<String> answerQueryList = Arrays.asList(question.getQuestionAnswer().split(","));
+        String answerQueryStr = question.getQuestionAnswer().replaceAll("\\[", "").replaceAll("\\]", "").replaceAll(" ", "");
+        String result = "答对:" + answerQueryStr;
+        List<String> answerQueryList = Arrays.asList(answerQueryStr.split(","));
         Boolean aBoolean = false;
         switch (questResultDTO.getType()) {
             case 1:
@@ -228,16 +231,14 @@ public class ProblemController {
                     log.error("question--->{}", question);
                     log.error("moniQuestionList--->{}", moniQuestionList);
                 }
-
-
                 simulationVO.setError(false);
                 simulationVO.setDone(true);
-
                 aBoolean = compareAnswers(answerDTOList, answerQueryList);
                 if (!aBoolean) {
                     result = "答错:正确答案是" + answerDTOList.toString();
                     userAnswerResult.setAnswerErrorCount(userAnswerResult.getAnswerErrorCount() + 1);
                     userAnswerResult.setAnswerLastResult(1);
+                    simulationVO.setError(true);
                 } else {
                     //正确
                     userAnswerResult.setAnswerLastResult(0);
@@ -260,7 +261,7 @@ public class ProblemController {
                 }
                 break;
         }
-        userAnswerResultService.getBaseMapper().insert(userAnswerResult);
+        userAnswerResultService.getBaseMapper().updateById(userAnswerResult);
         request.setAttribute("configurations", configService.getAllConfigs());
         return result;
     }

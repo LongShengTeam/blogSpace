@@ -18,6 +18,9 @@
         answer_error_count,answer_last_result,answer_count
     </sql>
     <select id="selectUserInfo" resultMap="BaseResultMap">
-        select * from user_answer_result where user_id=#{questResultDTO.userName} and question_id user_id=#{questResultDTO.id}
+        select * from user_answer_result where user_name=#{userName} and question_id=#{id}
+    </select>
+    <select id="selectErrorQuestion" resultMap="BaseResultMap">
+        select * from user_answer_result where user_name=#{userName} and answer_last_result=1 order by rand() limit 1
     </select>
 </mapper>
