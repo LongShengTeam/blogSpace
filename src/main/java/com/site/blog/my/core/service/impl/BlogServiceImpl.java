@@ -3,7 +3,7 @@ package com.site.blog.my.core.service.impl;
 import com.site.blog.my.core.controller.vo.BlogDetailVO;
 import com.site.blog.my.core.controller.vo.BlogListVO;
 import com.site.blog.my.core.controller.vo.SimpleBlogListVO;
-import com.site.blog.my.core.dao.*;
+import com.site.blog.my.core.mapper.*;
 import com.site.blog.my.core.entity.Blog;
 import com.site.blog.my.core.entity.BlogCategory;
 import com.site.blog.my.core.entity.BlogTag;

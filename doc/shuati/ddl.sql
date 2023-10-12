@@ -23,8 +23,8 @@ ALTER TABLE question ADD `category` int(4) DEFAULT NULL COMMENT '问题类别';
  drop table  user_answer_result;
  CREATE TABLE user_answer_result (
   id BIGINT(25) PRIMARY KEY AUTO_INCREMENT,
-  user_id BIGINT(25) NOT NULL COMMENT 'user_id',
-  question_id VARCHAR(20) COMMENT '问题答案',
+  user_name VARCHAR(25) NOT NULL COMMENT 'user_name',
+  question_id BIGINT(25) COMMENT '问题答案',
   answer_error_count BIGINT(25) NOT NULL DEFAULT 0 COMMENT '回答错误数',
   answer_last_result int(4)  COMMENT '最近结果是否正确0正确 1错误',
   answer_count BIGINT(25) NOT NULL DEFAULT 0  COMMENT '回答总数'

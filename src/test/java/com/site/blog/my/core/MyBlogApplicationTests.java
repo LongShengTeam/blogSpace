@@ -1,8 +1,6 @@
 package com.site.blog.my.core;
 
 import cn.hutool.core.io.resource.ResourceUtil;
-import com.site.blog.my.core.entity.Question;
-import com.site.blog.my.core.dao.QuestionMapper;
 import com.site.blog.my.core.service.AdminUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;

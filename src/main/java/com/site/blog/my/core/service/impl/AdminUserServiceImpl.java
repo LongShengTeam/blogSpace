@@ -1,6 +1,6 @@
 package com.site.blog.my.core.service.impl;
 
-import com.site.blog.my.core.dao.AdminUserMapper;
+import com.site.blog.my.core.mapper.AdminUserMapper;
 import com.site.blog.my.core.entity.AdminUser;
 import com.site.blog.my.core.service.AdminUserService;
 import com.site.blog.my.core.util.MD5Util;

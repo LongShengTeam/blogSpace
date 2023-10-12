@@ -1,12 +1,14 @@
 package com.site.blog.my.core.controller.problem;
 
 import cn.hutool.core.io.resource.ResourceUtil;
+import com.site.blog.my.core.entity.UserAnswerResult;
 import com.site.blog.my.core.process.data.ProcessingQuestion;
 import com.site.blog.my.core.controller.vo.SimulationVO;
 import com.site.blog.my.core.entity.Question;
 import com.site.blog.my.core.service.ConfigService;
 import com.site.blog.my.core.service.LinkService;
 import com.site.blog.my.core.service.QuestionService;
+import com.site.blog.my.core.service.UserAnswerResultService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -33,9 +35,11 @@ public class ProblemController {
     private QuestionService questionService;
 
     @Resource
+    private UserAnswerResultService userAnswerResultService;
+
+    @Resource
     HttpServletRequest request;
     private static HashMap<String, List<SimulationVO>> moniHashMap = new HashMap<>();
-    private static HashMap<String, List<ProcessingQuestion>> errorMap = new HashMap<String, List<ProcessingQuestion>>();
 
     @GetMapping("/next")
     public String next(@RequestParam("id") Integer id) {
@@ -151,20 +155,16 @@ public class ProblemController {
                 break;
 //            <option value="4" th:selected="${type == 4}"  autocomplete="off">错题</option>
             case 4:
-                List<ProcessingQuestion> errorQuestionList = errorMap.get("userName");
-                if (errorQuestionList != null) {
-                    request.setAttribute("question", errorQuestionList.get(0));
+                // 错题 下一个
+                UserAnswerResult userAnswerResult = userAnswerResultService.selectErrorQuestion(userName);
+                if (userAnswerResult != null) {
+                    request.setAttribute("question", questionService.getBaseMapper().selectById(userAnswerResult.getId()));
                 } else {
                     request.setAttribute("question", questionService.getBaseMapper().selectById(id));
                 }
                 break;
-//
         }
-
-//        ArrayList arrayList = new ArrayList();
-//        arrayList.add("")
         request.setAttribute("name", "韩静");
-
         request.setAttribute("configurations", configService.getAllConfigs());
         return "blog/" + theme + "/problem";
     }
@@ -181,37 +181,49 @@ public class ProblemController {
     public String answer(@RequestBody QuestResultDTO questResultDTO) {
         log.info("questResultDTO-->{}", questResultDTO);
         Question question = questionService.getBaseMapper().selectById(questResultDTO.getId());
-
-
-        List<ProcessingQuestion> questions = errorMap.get(questResultDTO.getUserName());
-        if (questions == null) {
-            questions = new ArrayList<ProcessingQuestion>();
-            errorMap.put(questResultDTO.getUserName(), questions);
+        UserAnswerResult userAnswerResult = userAnswerResultService.selectUserInfo(questResultDTO);
+        if (Objects.isNull(userAnswerResult)) {
+            userAnswerResult = new UserAnswerResult();
+            userAnswerResult.setUserName(questResultDTO.getUserName());
+            userAnswerResult.setQuestionId(questResultDTO.getId());
+            userAnswerResult.setAnswerErrorCount(0L);
+            userAnswerResult.setAnswerCount(0L);
         }
+        userAnswerResult.setAnswerCount(userAnswerResult.getAnswerCount() + 1);
         String result = "答对:" + question.getQuestionAnswer().toString();
         List<String> answerDTOList = questResultDTO.getAnswerList();
         List<String> answerQueryList = Arrays.asList(question.getQuestionAnswer().split(","));
-        Boolean aBoolean=false;
+        Boolean aBoolean = false;
         switch (questResultDTO.getType()) {
             case 1:
-                aBoolean= compareAnswers(answerDTOList, answerQueryList);
-                if(!aBoolean){
-                    result="答错:正确答案是" + answerDTOList.toString();
+                aBoolean = compareAnswers(answerDTOList, answerQueryList);
+                if (!aBoolean) {
+                    result = "答错:正确答案是" + answerDTOList.toString();
+                    userAnswerResult.setAnswerErrorCount(userAnswerResult.getAnswerErrorCount() + 1);
+                    userAnswerResult.setAnswerLastResult(1);
+                } else {
+                    //正确
+                    userAnswerResult.setAnswerLastResult(0);
                 }
                 break;
             case 2:
-                 aBoolean = compareAnswers(answerDTOList, answerQueryList);
-                if(!aBoolean){
-                    result="答错:正确答案是" + answerDTOList.toString();
+                aBoolean = compareAnswers(answerDTOList, answerQueryList);
+                if (!aBoolean) {
+                    result = "答错:正确答案是" + answerDTOList.toString();
+                    userAnswerResult.setAnswerErrorCount(userAnswerResult.getAnswerErrorCount() + 1);
+                    userAnswerResult.setAnswerLastResult(1);
+                } else {
+                    //正确
+                    userAnswerResult.setAnswerLastResult(0);
                 }
                 break;
             case 3:
                 //模拟答题
                 List<SimulationVO> moniQuestionList = moniHashMap.get(questResultDTO.getUserName());
-                SimulationVO simulationVO=null;
+                SimulationVO simulationVO = null;
                 List<SimulationVO> collect = moniQuestionList.parallelStream().filter(row -> row.getId().equals(questResultDTO.getId())).collect(Collectors.toList());
                 if (collect != null && collect.size() > 0) {
-                    simulationVO= collect.get(0);
+                    simulationVO = collect.get(0);
                 } else {
                     log.error("question--->{}", question);
                     log.error("moniQuestionList--->{}", moniQuestionList);
@@ -222,8 +234,13 @@ public class ProblemController {
                 simulationVO.setDone(true);
 
                 aBoolean = compareAnswers(answerDTOList, answerQueryList);
-                if(!aBoolean){
-                    result="答错:正确答案是" + answerDTOList.toString();
+                if (!aBoolean) {
+                    result = "答错:正确答案是" + answerDTOList.toString();
+                    userAnswerResult.setAnswerErrorCount(userAnswerResult.getAnswerErrorCount() + 1);
+                    userAnswerResult.setAnswerLastResult(1);
+                } else {
+                    //正确
+                    userAnswerResult.setAnswerLastResult(0);
                 }
                 result += "--->总共" + moniQuestionList.size() + "个,";
                 long errorCount = moniQuestionList.parallelStream().filter(row -> row.getError() != null && row.getError()).count();
@@ -233,12 +250,17 @@ public class ProblemController {
                 break;
             case 4:
                 aBoolean = compareAnswers(answerDTOList, answerQueryList);
-                if(!aBoolean){
-                    result="答错:正确答案是" + answerDTOList.toString();
+                if (!aBoolean) {
+                    result = "答错:正确答案是" + answerDTOList.toString();
+                    userAnswerResult.setAnswerErrorCount(userAnswerResult.getAnswerErrorCount() + 1);
+                    userAnswerResult.setAnswerLastResult(1);
+                } else {
+                    //正确
+                    userAnswerResult.setAnswerLastResult(0);
                 }
                 break;
         }
-
+        userAnswerResultService.getBaseMapper().insert(userAnswerResult);
         request.setAttribute("configurations", configService.getAllConfigs());
         return result;
     }
@@ -256,7 +278,6 @@ public class ProblemController {
         set2.removeAll(answerDTOList);
         return set1.size() == 0 && set2.size() == 0;
     }
-
 
 
 }

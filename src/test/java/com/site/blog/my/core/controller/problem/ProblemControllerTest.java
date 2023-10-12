@@ -2,7 +2,7 @@ package com.site.blog.my.core.controller.problem;
 
 import cn.hutool.core.io.resource.ResourceUtil;
 import com.site.blog.my.core.process.data.ProcessingQuestion;
-import com.site.blog.my.core.dao.QuestionMapper;
+import com.site.blog.my.core.mapper.QuestionMapper;
 import com.site.blog.my.core.entity.Question;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;

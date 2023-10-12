@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.site.blog.my.core.mapper.UserAnswerResultMapper">
+
+    <resultMap id="BaseResultMap" type="com.site.blog.my.core.entity.UserAnswerResult">
+            <id property="id" column="id" jdbcType="BIGINT"/>
+            <result property="userName" column="user_name" jdbcType="VARCHAR"/>
+            <result property="questionId" column="question_id" jdbcType="BIGINT"/>
+            <result property="answerErrorCount" column="answer_error_count" jdbcType="BIGINT"/>
+            <result property="answerLastResult" column="answer_last_result" jdbcType="INTEGER"/>
+            <result property="answerCount" column="answer_count" jdbcType="BIGINT"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,user_name,question_id,
+        answer_error_count,answer_last_result,answer_count
+    </sql>
+    <select id="selectUserInfo" resultMap="BaseResultMap">
+        select * from user_answer_result where user_id=#{questResultDTO.userName} and question_id user_id=#{questResultDTO.id}
+    </select>
+</mapper>

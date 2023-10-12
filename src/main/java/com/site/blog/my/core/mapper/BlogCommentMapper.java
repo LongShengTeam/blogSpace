@@ -1,4 +1,4 @@
-package com.site.blog.my.core.dao;
+package com.site.blog.my.core.mapper;
 
 import com.site.blog.my.core.entity.BlogComment;
 import java.util.List;

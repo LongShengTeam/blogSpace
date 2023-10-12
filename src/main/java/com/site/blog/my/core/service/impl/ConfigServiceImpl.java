@@ -1,6 +1,6 @@
 package com.site.blog.my.core.service.impl;
 
-import com.site.blog.my.core.dao.BlogConfigMapper;
+import com.site.blog.my.core.mapper.BlogConfigMapper;
 import com.site.blog.my.core.entity.BlogConfig;
 import com.site.blog.my.core.service.ConfigService;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,4 +1,4 @@
-package com.site.blog.my.core.dao;
+package com.site.blog.my.core.mapper;
 
 import com.site.blog.my.core.entity.BlogTag;
 import com.site.blog.my.core.entity.BlogTagCount;
