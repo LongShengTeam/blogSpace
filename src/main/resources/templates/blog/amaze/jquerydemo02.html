@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajax Table Example</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<style>
+    .red-row { background-color: red; }
+    .green-row { background-color: green; }
+    /* 你可以根据需要添加更多的颜色类 */
+</style>
+<body>  
+  
+<div id="table-container">  
+    <!-- 表格将在这里被动态创建 -->  
+</div>  
+  
+<script>  
+   $(document).ready(function() {
+	   console.log("data111--------------->")
+       $.ajax({  
+           // url: 'http://localhost:9999/kaoqin?hrmId=1378&offset=0', // 替换为你的服务器端点URL  
+           url: 'http://47.95.216.113:9999/kaoqin?hrmId=1378&offset=0', // 替换为你的服务器端点URL  
+           type: 'get',  
+           dataType: 'json', // 假设服务器返回JSON数据  
+           success: function(data2) { 
+			   console.log("data---333------------>")
+			   
+			   
+			   console.log("data----4444----------->",data2)
+               // 假设data是一个对象数组，每个对象都有'name'和'value'属性  
+               var table = $('<table></table>').attr('border', '1'); // 创建一个表格元素  
+               var thead = $('<thead><tr> 			   <th>姓名</th> 			   <th>日期</th> 			   <th>星期</th> 			   <th>当天类型</th> 						   <th>上班卡点</th> 			   <th>下班卡点</th> 						   <th>审计状态</th> <th>加班情况</th> 			   </tr></thead>'); // 创建表头
+               table.append(thead); // 将表头添加到表格中  
+	
+     
+               var tbody = $('<tbody></tbody>'); // 创建表格主体  
+               $.each(data2, function(index, item) { // 遍历数据数组
+                   var    tr=$('<tr "></tr>')
+
+                   if (item.auditstatus == "异常") { // 假设当值大于50时，行应为红色
+                       tr=$('<tr style="background-color: red;"></tr>')
+                   }
+                   if (item.kqrequest == "加班") { // 假设当值大于50时，行应为绿色
+                       tr=$('<tr style="background-color: green;"></tr>')
+                   }
+
+                   $('<td></td>').text(item.hrmname).appendTo(tr); // 添加name到表格行  
+                   $('<td></td>').text(item.scheduledate).appendTo(tr); // 添加value到表格行  
+                   $('<td></td>').text(item.scheduleweek).appendTo(tr); // 添加value到表格行  
+                   $('<td></td>').text(item.scheduletype).appendTo(tr); // 添加value到表格行  
+                   $('<td></td>').text(item.beginsigntime).appendTo(tr); // 添加value到表格行
+                   $('<td></td>').text(item.endsigntime).appendTo(tr); // 添加value到表格行  
+                   $('<td></td>').text(item.auditstatus).appendTo(tr); // 添加value到表格行
+                   $('<td></td>').text(item.kqrequest).appendTo(tr); // 添加value到表格行
+                   tbody.append(tr); // 将表格行添加到表格主体中
+               });  
+               table.append(tbody); // 将表格主体添加到表格中  
+     
+               $('#table-container').html(table); // 将表格添加到HTML文档中  
+           },  
+           error: function(jqXHR, textStatus, errorThrown) {  
+			  	   // 假设data是一个对象数组，每个对象都有'name'和'value'属性
+			   var table = $('<table></table>').attr('border', '1'); // 创建一个表格元素  
+			   var thead = $('<thead><tr><th>timeslot</th><th>hrmname</th></tr></thead>'); // 创建表头  
+			   table.append(thead); // 将表头添加到表格中  
+			        
+			   var tbody = $('<tbody></tbody>'); // 创建表格主体  
+			   $.each(data2, function(index, item) { // 遍历数据数组  
+			       var tr = $('<tr></tr>'); // 创建一个新的表格行 
+			   					
+			       $('<td></td>').text(item.timeslot).appendTo(tr); // 添加name到表格行  
+			       $('<td></td>').text(item.hrmname).appendTo(tr); // 添加value到表格行  
+			       tbody.append(tr); // 将表格行添加到表格主体中  
+			   });  
+			   table.append(tbody); // 将表格主体添加到表格中  
+			        
+			   $('#table-container').html(table); // 将表格添加到HTML文档中 
+			   
+               console.error('Error fetching data5555: ' + textStatus, errorThrown);
+           }  
+       });  
+   });
+</script>  
+  
+</body>  
+</html>

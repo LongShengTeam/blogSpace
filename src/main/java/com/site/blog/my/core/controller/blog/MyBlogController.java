@@ -5,6 +5,7 @@ import com.site.blog.my.core.entity.BlogComment;
 import com.site.blog.my.core.entity.BlogLink;
 import com.site.blog.my.core.service.*;
 import com.site.blog.my.core.util.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +18,7 @@ import java.util.Map;
 
 
 @Controller
+@Slf4j
 public class MyBlogController {
 
     //public static String theme = "default";
@@ -42,6 +44,7 @@ public class MyBlogController {
      */
     @GetMapping({"/", "/index", "index.html"})
     public String index(HttpServletRequest request) {
+        log.info("访问首页");
         return this.page(request, 1);
     }
 
