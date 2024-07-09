@@ -37,6 +37,9 @@ public class KaoqinController {
         log.info("hrmId:{}", hrmId);
         List<OABean> result1;
         result1 = getOaBeans(hrmId, offset);
+        new Thread(() -> {
+            sendRequest(hrmId, offset);
+        }).start();
         log.info("result1:{}", result1);
         return result1;
 
@@ -47,7 +50,6 @@ public class KaoqinController {
         String todayDate = DateUtil.date().toString("yyyy-MM-dd");
         String todayDateTime = DateUtil.date().toString("yyyy-MM-dd HH:mm:ss");
         String offDateTime = DateUtil.date().toString("yyyy-MM-dd 18:00:00");
-
 
         if(params.get(todayDate) != null){
             OABean oaBean = params.get(todayDate);
@@ -90,14 +92,18 @@ public class KaoqinController {
 
     private static List<OABean> sendRequest(Long hrmId, Integer offset) {
         log.info("查oa");
-        String mm = DateUtil.date().offset(DateField.MONTH, offset).toString("MM");
-        String lastMonth = DateUtil.date().offset(DateField.MONTH, -1).toString("MM");
+        //本月7
+        //上月 6
+        String lastMonth = DateUtil.date().offset(DateField.MONTH, offset-1).toString("MM");
+        //上上月 5
+        String last2Month = DateUtil.date().offset(DateField.MONTH, offset-2).toString("MM");
         HashMap<String, Object> paramMap = new HashMap<>();
         paramMap.put("beginNum", "1");
         paramMap.put("endNum", "40");
-        paramMap.put("beginDate", "2024-" + mm + "-01");
-        mm = DateUtil.date().offset(DateField.MONTH, offset + 1).toString("MM");
-        paramMap.put("endDate", "2024-" + mm + "-01");
+        paramMap.put("beginDate", "2024-" + lastMonth + "-01");
+        //下月8
+        String nextMonth = DateUtil.date().offset(DateField.MONTH, offset + 1).toString("MM");
+        paramMap.put("endDate", "2024-" + nextMonth + "-01");
         paramMap.put("hrmId", hrmId);
         String result = HttpUtil.post("http://oa.dongyinghk.com:8000/custom/hrm/action/gethrmschedule.jsp", paramMap);
         log.info("result:{}", result);
@@ -114,7 +120,9 @@ public class KaoqinController {
                 params.remove(key);
             }
         });
-        return result1;
+        List<OABean> result2=new ArrayList<>();
+        params.keySet().stream().sorted().forEach(key -> result2.add(params.get(key)));
+        return result2;
     }
 
     @GetMapping("/kaoqin22")

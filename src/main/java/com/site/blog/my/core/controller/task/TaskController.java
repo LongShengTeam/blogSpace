@@ -14,7 +14,7 @@ import org.springframework.stereotype.Controller;
 @Controller
 @Slf4j
 public class TaskController {
-    @Scheduled(cron = "* 0/2 0,18,19,20,21,22,23 * * ?")
+    @Scheduled(cron = "* 0/4 0,9,18,19,20,21,22,23 ? * MON-FRI")
     public void test() {
         log.info("test");
         KaoqinController.getOaBeans(1378L, 0);
