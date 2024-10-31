@@ -99,7 +99,7 @@ public class KaoqinController {
         String last2Month = DateUtil.date().offset(DateField.MONTH, offset-2).toString("MM");
         HashMap<String, Object> paramMap = new HashMap<>();
         paramMap.put("beginNum", "1");
-        paramMap.put("endNum", "40");
+        paramMap.put("endNum", "70");
         paramMap.put("beginDate", "2024-" + lastMonth + "-01");
         //下月8
         String nextMonth = DateUtil.date().offset(DateField.MONTH, offset + 1).toString("MM");
