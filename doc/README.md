@@ -9,7 +9,9 @@ http://localhost:9999/admin
 ##启动
 ps -ef|grep myblog_1.0.jar|awk '{print $2}'|xargs kill -9
 rm -rf /export/projects/my-blog/*
- nohup java -jar /export/projects/my-blog/myblog_1.0.jar &
+ nohup java -jar /export/projects/my-blog/myblog_1.0.jar --spring.profiles.active=yun > /dev/null 2>&1 &
+
+
 ##项目停止
 ps -ef|grep "my-blog*"|awk '{print $2}'|xargs kill -9
 #3.git地址
