@@ -30,7 +30,7 @@ public class KaoqinController {
 
     public static Map<String, OABean> params = new HashMap<>();
 
-    //"beginNum=21&endNum=40&beginDate=2024-06-01&endDate=2024-06-30&status=&subcompanyId=&departmentId=&hrmId=1378"
+    //"beginNum=21&endNum=40&beginDate=2025-06-01&endDate=2025-06-30&status=&subcompanyId=&departmentId=&hrmId=1378"
     @GetMapping("/kaoqin")
     @ResponseBody
     public List<OABean> kaoqin(@RequestParam("hrmId") Long hrmId, @RequestParam("offset") Integer offset) {
@@ -100,10 +100,10 @@ public class KaoqinController {
         HashMap<String, Object> paramMap = new HashMap<>();
         paramMap.put("beginNum", "1");
         paramMap.put("endNum", "70");
-        paramMap.put("beginDate", "2024-" + lastMonth + "-01");
+        paramMap.put("beginDate", "2025-" + lastMonth + "-01");
         //下月8
         String nextMonth = DateUtil.date().offset(DateField.MONTH, offset + 1).toString("MM");
-        paramMap.put("endDate", "2024-" + nextMonth + "-01");
+        paramMap.put("endDate", "2025-" + nextMonth + "-01");
         paramMap.put("hrmId", hrmId);
         String result = HttpUtil.post("http://oa.dongyinghk.com:8000/custom/hrm/action/gethrmschedule.jsp", paramMap);
         log.info("result:{}", result);
@@ -116,7 +116,7 @@ public class KaoqinController {
             params.put(row.getScheduledate(), row);
         });
         params.keySet().stream().sorted().forEach(key -> {
-            if (key.compareTo("2024-" + lastMonth + "-01") < 0) {
+            if (key.compareTo("2025-" + lastMonth + "-01") < 0) {
                 params.remove(key);
             }
         });
