@@ -135,6 +135,7 @@
             flex: 1;
             display: flex;
             flex-direction: column;
+            position: relative;
         }
 
         .chat-header {
@@ -146,6 +147,24 @@
             padding: 0 20px;
             font-size: 16px;
             color: #333;
+            flex-shrink: 0;
+        }
+
+        .chat-header .video-btn {
+            margin-left: auto;
+            height: 30px;
+            padding: 0 12px;
+            border: none;
+            border-radius: 4px;
+            background: #07c160;
+            color: #fff;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .chat-header .video-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
         }
 
         .chat-messages {
@@ -232,6 +251,7 @@
             display: flex;
             flex-direction: column;
             padding: 10px 16px;
+            flex-shrink: 0;
         }
 
         .chat-input textarea {
@@ -270,6 +290,140 @@
             font-size: 12px;
             color: #999;
         }
+
+        /* 视频通话弹窗 */
+        .video-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+        }
+
+        .video-overlay.show {
+            display: flex;
+        }
+
+        .video-box {
+            position: relative;
+            width: 720px;
+            height: 480px;
+            background: #111;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .video-box .remote-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            background: #222;
+        }
+
+        .video-box .local-video {
+            position: absolute;
+            right: 12px;
+            bottom: 12px;
+            width: 160px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 6px;
+            background: #333;
+            border: 2px solid #fff;
+        }
+
+        .video-box .video-name {
+            position: absolute;
+            top: 12px;
+            left: 16px;
+            color: #fff;
+            font-size: 15px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+        }
+
+        .video-box .video-controls {
+            position: absolute;
+            bottom: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 16px;
+        }
+
+        .video-box .ctrl-btn {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            color: #fff;
+            font-size: 12px;
+        }
+
+        .video-box .ctrl-hangup {
+            background: #e74c3c;
+        }
+
+        .video-box .ctrl-mute {
+            background: #555;
+        }
+
+        /* 来电提示 */
+        .incoming-box {
+            text-align: center;
+            color: #fff;
+        }
+
+        .incoming-box .avatar-big {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: #07c160;
+            color: #fff;
+            font-size: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+        }
+
+        .incoming-box .incoming-name {
+            font-size: 18px;
+            margin-bottom: 24px;
+        }
+
+        .incoming-box .incoming-btns {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+        }
+
+        .incoming-box .accept-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            background: #07c160;
+            color: #fff;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .incoming-box .reject-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            background: #e74c3c;
+            color: #fff;
+            cursor: pointer;
+            font-size: 13px;
+        }
     </style>
 </head>
 <body>
@@ -287,10 +441,13 @@
 
     <!-- 右侧聊天区 -->
     <div class="main">
-        <div class="chat-header" id="chatTitle">请选择一个用户开始聊天</div>
+        <div class="chat-header">
+            <span id="chatTitle">请选择一个用户开始聊天</span>
+            <button class="video-btn" id="videoBtn" disabled>视频通话</button>
+        </div>
         <div class="chat-messages" id="chatMessages"></div>
         <div class="chat-input">
-            <textarea id="inputText" placeholder="输入消息，Ctrl+Enter 发送" disabled></textarea>
+            <textarea id="inputText" placeholder="输入消息，Enter 发送" disabled></textarea>
             <div class="actions">
                 <span class="tip" id="statusTip">未连接</span>
                 <button class="send-btn" id="sendBtn" disabled>发送</button>
@@ -299,9 +456,31 @@
     </div>
 </div>
 
+<!-- 视频通话弹窗 -->
+<div class="video-overlay" id="videoOverlay">
+    <div class="video-box" id="videoBox" style="display:none;">
+        <video class="remote-video" id="remoteVideo" autoplay playsinline></video>
+        <video class="local-video" id="localVideo" autoplay playsinline muted></video>
+        <div class="video-name" id="videoName"></div>
+        <div class="video-controls">
+            <button class="ctrl-btn ctrl-mute" id="muteBtn">静音</button>
+            <button class="ctrl-btn ctrl-hangup" id="hangupBtn">挂断</button>
+        </div>
+    </div>
+
+    <!-- 来电提示 -->
+    <div class="incoming-box" id="incomingBox" style="display:none;">
+        <div class="avatar-big" id="incomingAvatar"></div>
+        <div class="incoming-name" id="incomingName"></div>
+        <div class="incoming-btns">
+            <button class="accept-btn" id="acceptBtn">接听</button>
+            <button class="reject-btn" id="rejectBtn">拒绝</button>
+        </div>
+    </div>
+</div>
+
 <script>
     (function () {
-        // Netty WebSocket 端口
         var WS_URL = 'ws://' + location.hostname + ':9000/ws';
 
         var socket = null;
@@ -316,8 +495,28 @@
         var inputText = document.getElementById('inputText');
         var sendBtn = document.getElementById('sendBtn');
         var statusTip = document.getElementById('statusTip');
+        var videoBtn = document.getElementById('videoBtn');
 
-        // 头像颜色池
+        var videoOverlay = document.getElementById('videoOverlay');
+        var videoBox = document.getElementById('videoBox');
+        var incomingBox = document.getElementById('incomingBox');
+        var remoteVideo = document.getElementById('remoteVideo');
+        var localVideo = document.getElementById('localVideo');
+        var videoName = document.getElementById('videoName');
+        var incomingAvatar = document.getElementById('incomingAvatar');
+        var incomingName = document.getElementById('incomingName');
+        var acceptBtn = document.getElementById('acceptBtn');
+        var rejectBtn = document.getElementById('rejectBtn');
+        var hangupBtn = document.getElementById('hangupBtn');
+        var muteBtn = document.getElementById('muteBtn');
+
+        // WebRTC 相关
+        var peerConnection = null;
+        var localStream = null;
+        var remoteUser = ''; // 当前通话对象
+        var isCaller = false; // 是否发起方
+        var muted = false;
+
         var colors = ['#07c160', '#4a90d9', '#f39c12', '#e74c3c', '#9b59b6', '#1abc9c', '#e67e22', '#34495e'];
 
         function getColor(name) {
@@ -333,12 +532,7 @@
 
             socket.onopen = function () {
                 statusTip.textContent = '已连接';
-                // 发送上线消息
-                var msg = {
-                    type: 2,
-                    from: myNickname
-                };
-                socket.send(JSON.stringify(msg));
+                socket.send(JSON.stringify({ type: 2, from: myNickname }));
             };
 
             socket.onmessage = function (event) {
@@ -348,9 +542,7 @@
             socket.onclose = function () {
                 statusTip.textContent = '连接断开，重连中...';
                 setTimeout(function () {
-                    if (myNickname) {
-                        connect();
-                    }
+                    if (myNickname) connect();
                 }, 2000);
             };
 
@@ -361,51 +553,253 @@
 
         function handleMessage(msg) {
             if (msg.type === 4) {
-                // 在线用户列表更新
                 renderUserList(JSON.parse(msg.content));
                 return;
             }
-
             if (msg.type === 2) {
-                // 上线通知
                 addSystemMsg(msg.from + ' 上线了');
                 return;
             }
-
             if (msg.type === 3) {
                 addSystemMsg(msg.from + ' 下线了');
                 return;
             }
 
-            // 文本消息
-            var isSelf = msg.from === myNickname;
-            // 过滤：点对点消息只显示给发送方或接收方
-            if (msg.to && !isSelf && msg.to !== myNickname) {
+            // 视频信令
+            if (msg.type >= 10 && msg.type <= 16) {
+                handleSignal(msg);
                 return;
             }
-            // 如果当前聊天对象是 msg.to（对方），或聊天对象是 msg.from
+
+            // 文本消息
+            var isSelf = msg.from === myNickname;
+            if (msg.to && !isSelf && msg.to !== myNickname) return;
             if (msg.to && msg.to !== myNickname) {
-                // 我是接收方
-                if (currentTo === msg.from) {
-                    addMessage(msg.from, msg.content, false);
-                }
+                if (currentTo === msg.from) addMessage(msg.from, msg.content, false);
             } else if (msg.to === myNickname) {
-                // 我发出的私聊消息回显
-                if (currentTo === msg.from) {
-                    addMessage(msg.from, msg.content, true);
-                }
+                if (currentTo === msg.from) addMessage(msg.from, msg.content, true);
             } else {
-                // 群聊
-                if (!currentTo) {
-                    addMessage(msg.from, msg.content, isSelf);
-                }
+                if (!currentTo) addMessage(msg.from, msg.content, isSelf);
             }
         }
+
+        /* ==================== 视频通话信令处理 ==================== */
+
+        function sendSignal(type, to, content) {
+            if (!socket || socket.readyState !== WebSocket.OPEN) return;
+            socket.send(JSON.stringify({
+                type: type,
+                from: myNickname,
+                to: to,
+                content: content,
+                timestamp: Date.now()
+            }));
+        }
+
+        // 发起视频通话
+        function startCall() {
+            if (!currentTo) {
+                alert('请先选择一个用户');
+                return;
+            }
+            remoteUser = currentTo;
+            isCaller = true;
+            showVideoBox(remoteUser);
+            getLocalStream(function () {
+                createPeerConnection();
+                // 创建 offer
+                peerConnection.createOffer()
+                    .then(function (offer) {
+                        return peerConnection.setLocalDescription(offer);
+                    })
+                    .then(function () {
+                        sendSignal(14, remoteUser, JSON.stringify(peerConnection.localDescription));
+                    });
+            });
+            // 发送邀请
+            sendSignal(10, remoteUser, '');
+        }
+
+        // 收到邀请
+        function onIncomingCall(from) {
+            if (remoteUser && peerConnection) {
+                // 忙，直接拒绝
+                sendSignal(12, from, '');
+                return;
+            }
+            remoteUser = from;
+            isCaller = false;
+            showIncomingBox(from);
+        }
+
+        function acceptCall() {
+            showVideoBox(remoteUser);
+            getLocalStream(function () {
+                createPeerConnection();
+            });
+            sendSignal(11, remoteUser, '');
+        }
+
+        function rejectCall() {
+            sendSignal(12, remoteUser, '');
+            closeVideo();
+        }
+
+        function hangup() {
+            sendSignal(13, remoteUser, '');
+            closeVideo();
+        }
+
+        function handleSignal(msg) {
+            var type = msg.type;
+            var from = msg.from;
+
+            switch (type) {
+                case 10: // 邀请
+                    if (from !== myNickname) onIncomingCall(from);
+                    break;
+                case 11: // 接受
+                    if (from === remoteUser && isCaller) {
+                        // 对方接受，此时 offer 已发，等待 answer 或 ICE
+                    }
+                    break;
+                case 12: // 拒绝
+                    if (from === remoteUser) {
+                        addSystemMsg('对方拒绝了视频通话');
+                        closeVideo();
+                    }
+                    break;
+                case 13: // 挂断
+                    if (from === remoteUser) {
+                        addSystemMsg('对方已挂断');
+                        closeVideo();
+                    }
+                    break;
+                case 14: // offer
+                    if (from === remoteUser && !isCaller) {
+                        // 接听方收到 offer
+                        if (!peerConnection) {
+                            getLocalStream(function () {
+                                createPeerConnection();
+                                var desc = JSON.parse(msg.content);
+                                peerConnection.setRemoteDescription(new RTCSessionDescription(desc)).then(function () {
+                                    return peerConnection.createAnswer();
+                                }).then(function (answer) {
+                                    return peerConnection.setLocalDescription(answer);
+                                }).then(function () {
+                                    sendSignal(15, remoteUser, JSON.stringify(peerConnection.localDescription));
+                                });
+                            });
+                        }
+                    }
+                    break;
+                case 15: // answer
+                    if (from === remoteUser && isCaller) {
+                        var ansDesc = JSON.parse(msg.content);
+                        peerConnection.setRemoteDescription(new RTCSessionDescription(ansDesc));
+                    }
+                    break;
+                case 16: // ICE
+                    if (from === remoteUser && peerConnection) {
+                        var candidate = JSON.parse(msg.content);
+                        peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+                    }
+                    break;
+            }
+        }
+
+        /* ==================== WebRTC 核心 ==================== */
+
+        function getLocalStream(callback) {
+            if (localStream) {
+                callback();
+                return;
+            }
+            navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+                .then(function (stream) {
+                    localStream = stream;
+                    localVideo.srcObject = stream;
+                    callback();
+                })
+                .catch(function (err) {
+                    alert('无法获取摄像头/麦克风：' + err.message);
+                    if (isCaller) {
+                        sendSignal(13, remoteUser, '');
+                        closeVideo();
+                    }
+                });
+        }
+
+        function createPeerConnection() {
+            peerConnection = new RTCPeerConnection({
+                iceServers: [
+                    { urls: 'stun:stun.l.google.com:19302' }
+                ]
+            });
+
+            // 添加本地流
+            if (localStream) {
+                localStream.getTracks().forEach(function (track) {
+                    peerConnection.addTrack(track, localStream);
+                });
+            }
+
+            // 远端流
+            peerConnection.ontrack = function (event) {
+                remoteVideo.srcObject = event.streams[0];
+            };
+
+            // ICE 候选
+            peerConnection.onicecandidate = function (event) {
+                if (event.candidate) {
+                    sendSignal(16, remoteUser, JSON.stringify(event.candidate));
+                }
+            };
+        }
+
+        function showVideoBox(name) {
+            incomingBox.style.display = 'none';
+            videoBox.style.display = 'block';
+            videoOverlay.classList.add('show');
+            videoName.textContent = '与 ' + name + ' 视频通话中';
+        }
+
+        function showIncomingBox(name) {
+            videoBox.style.display = 'none';
+            incomingBox.style.display = 'block';
+            videoOverlay.classList.add('show');
+            incomingName.textContent = name + ' 邀请你视频通话';
+            incomingAvatar.textContent = name.charAt(0);
+            incomingAvatar.style.background = getColor(name);
+        }
+
+        function closeVideo() {
+            if (peerConnection) {
+                peerConnection.close();
+                peerConnection = null;
+            }
+            if (localStream) {
+                localStream.getTracks().forEach(function (track) {
+                    track.stop();
+                });
+                localStream = null;
+            }
+            remoteVideo.srcObject = null;
+            localVideo.srcObject = null;
+            videoOverlay.classList.remove('show');
+            videoBox.style.display = 'none';
+            incomingBox.style.display = 'none';
+            remoteUser = '';
+            isCaller = false;
+            muted = false;
+            muteBtn.textContent = '静音';
+        }
+
+        /* ==================== UI ==================== */
 
         function renderUserList(users) {
             userListEl.innerHTML = '';
 
-            // 群聊入口
             var group = document.createElement('div');
             group.className = 'user-item' + (currentTo === '' ? ' active' : '');
             group.innerHTML =
@@ -440,15 +834,15 @@
             chatMessages.innerHTML = '';
             inputText.disabled = false;
             sendBtn.disabled = false;
+            videoBtn.disabled = (name === '群聊');
             addSystemMsg('正在与 ' + name + ' 聊天');
         }
 
         function addMessage(from, content, isSelf) {
             var div = document.createElement('div');
             div.className = 'message' + (isSelf ? ' self' : '');
-            var first = from.charAt(0);
             div.innerHTML =
-                '<div class="avatar" style="background:' + getColor(from) + ';">' + first + '</div>' +
+                '<div class="avatar" style="background:' + getColor(from) + ';">' + from.charAt(0) + '</div>' +
                 '<div class="bubble"></div>';
             div.querySelector('.bubble').textContent = content;
             chatMessages.appendChild(div);
@@ -465,22 +859,20 @@
 
         function sendMessage() {
             var content = inputText.value.trim();
-            if (!content || !socket || socket.readyState !== WebSocket.OPEN) {
-                return;
-            }
-            var msg = {
+            if (!content || !socket || socket.readyState !== WebSocket.OPEN) return;
+            socket.send(JSON.stringify({
                 type: 1,
                 from: myNickname,
                 to: currentTo,
                 content: content,
                 timestamp: Date.now()
-            };
-            socket.send(JSON.stringify(msg));
+            }));
             inputText.value = '';
             inputText.focus();
         }
 
-        // 登录
+        /* ==================== 事件绑定 ==================== */
+
         loginBtn.onclick = function () {
             var name = nicknameInput.value.trim();
             if (!name) {
@@ -493,16 +885,28 @@
             connect();
         };
 
-        // 发送按钮
         sendBtn.onclick = sendMessage;
 
-        // 回车发送
         inputText.addEventListener('keydown', function (e) {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 sendMessage();
             }
         });
+
+        videoBtn.onclick = startCall;
+        acceptBtn.onclick = acceptCall;
+        rejectBtn.onclick = rejectCall;
+        hangupBtn.onclick = hangup;
+
+        muteBtn.onclick = function () {
+            if (!localStream) return;
+            muted = !muted;
+            localStream.getAudioTracks().forEach(function (track) {
+                track.enabled = !muted;
+            });
+            muteBtn.textContent = muted ? '取消静音' : '静音';
+        };
     })();
 </script>
 </body>

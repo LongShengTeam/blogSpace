@@ -9,7 +9,10 @@ import lombok.Data;
 public class ChatMessage {
 
     /**
-     * 消息类型：1-文本 2-上线通知 3-下线通知
+     * 消息类型：
+     * 1-文本  2-上线通知  3-下线通知  4-在线用户列表
+     * 10-视频通话邀请  11-接受通话  12-拒绝通话  13-挂断
+     * 14-offer SDP  15-answer SDP  16-ICE candidate
      */
     private Integer type;
 

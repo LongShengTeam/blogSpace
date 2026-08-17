@@ -44,6 +44,15 @@ public class ChatServerHandler extends SimpleChannelInboundHandler<TextWebSocket
         String to = message.getTo();
         message.setTimestamp(System.currentTimeMillis());
 
+        Integer type = message.getType();
+
+        // 视频通话信令（10-16）：点对点转发，不回显
+        if (type != null && type >= 10 && type <= 16) {
+            ChannelManager.sendTo(to, JSONUtil.toJsonStr(message));
+            log.info("[{}] -> [{}] 信令 type={}", from, to, type);
+            return;
+        }
+
         if (to == null || to.trim().isEmpty()) {
             // 群发
             ChannelManager.broadcast(json);
