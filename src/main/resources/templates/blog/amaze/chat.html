@@ -710,9 +710,40 @@
 
         /* ==================== WebRTC 核心 ==================== */
 
+        // 枚举系统识别到的摄像头/麦克风，用于诊断
+        function getDeviceDiagnose() {
+            var msg = '系统识别到的设备：';
+            navigator.mediaDevices.enumerateDevices().then(function (devices) {
+                var cams = devices.filter(function (d) { return d.kind === 'videoinput'; });
+                var mics = devices.filter(function (d) { return d.kind === 'audioinput'; });
+                msg += '\n摄像头 ' + cams.length + ' 个' +
+                    (cams.length ? '：' + cams.map(function (d) { return d.label || '(未命名)'; }).join('、') : '（未识别到摄像头）');
+                msg += '\n麦克风 ' + mics.length + ' 个' +
+                    (mics.length ? '：' + mics.map(function (d) { return d.label || '(未命名)'; }).join('、') : '（未识别到麦克风）');
+                if (!cams.length && !mics.length) {
+                    msg += '\n\n提示：系统未识别到任何摄像头和麦克风，请检查设备管理器中的“照相机”和“音频输入和输出”是否正常，必要时重装驱动。';
+                }
+                alert(msg);
+            }).catch(function () {
+                alert('无法枚举设备列表。');
+            });
+            return '';
+        }
+
         function getLocalStream(callback) {
             if (localStream) {
                 callback();
+                return;
+            }
+            // 先检查安全上下文和设备
+            if (!window.isSecureContext) {
+                alert('当前页面不是安全上下文（https 或 localhost），浏览器禁止访问摄像头/麦克风。\n请使用 http://localhost:9999/chat 访问。');
+                if (isCaller) { sendSignal(13, remoteUser, ''); closeVideo(); }
+                return;
+            }
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                alert('当前浏览器不支持 getUserMedia，请使用最新版 Chrome/Edge/Firefox。');
+                if (isCaller) { sendSignal(13, remoteUser, ''); closeVideo(); }
                 return;
             }
             navigator.mediaDevices.getUserMedia({ video: true, audio: true })
@@ -722,7 +753,27 @@
                     callback();
                 })
                 .catch(function (err) {
-                    alert('无法获取摄像头/麦克风：' + err.message);
+                    var tips;
+                    switch (err.name) {
+                        case 'NotAllowedError':
+                        case 'PermissionDeniedError':
+                            tips = '摄像头/麦克风权限被拒绝。\n请在地址栏左侧图标里允许摄像头和麦克风权限，\n并检查系统“隐私设置”中是否允许浏览器访问相机/麦克风。';
+                            break;
+                        case 'NotFoundError':
+                        case 'DevicesNotFoundError':
+                            tips = '未找到摄像头/麦克风设备。\n' + getDeviceDiagnose();
+                            break;
+                        case 'NotReadableError':
+                        case 'TrackStartError':
+                            tips = '摄像头/麦克风被其他程序占用，请关闭占用设备的软件后重试。';
+                            break;
+                        case 'OverconstrainedError':
+                            tips = '没有满足要求的摄像头/麦克风设备。';
+                            break;
+                        default:
+                            tips = '无法获取摄像头/麦克风。';
+                    }
+                    alert(tips + '\n\n错误信息：' + err.name + ' - ' + err.message);
                     if (isCaller) {
                         sendSignal(13, remoteUser, '');
                         closeVideo();
