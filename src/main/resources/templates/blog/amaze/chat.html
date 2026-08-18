@@ -481,7 +481,19 @@
 
 <script>
     (function () {
-        var WS_URL = 'ws://' + location.hostname + ':9000/ws';
+        // 信令地址：优先走同域同端口的 /ws（配合 nginx 反代到 Netty 9000），
+        // 通过 URL 参数 ?wsPort=9000 或 ?wsUrl=ws://... 可覆盖
+        function resolveWsUrl() {
+            var params = new URLSearchParams(location.search);
+            if (params.get('wsUrl')) {
+                return params.get('wsUrl');
+            }
+            var wsProtocol = location.protocol === 'https:' ? 'wss://' : 'ws://';
+            var port = params.get('wsPort') || '9000';
+            // return wsProtocol + location.hostname + ':' + port + '/ws';
+            return wsProtocol + location.hostname  + '/ws';
+        }
+        var WS_URL = resolveWsUrl();
 
         var socket = null;
         var myNickname = '';
@@ -735,14 +747,16 @@
                 callback();
                 return;
             }
-            // 先检查安全上下文和设备
-            if (!window.isSecureContext) {
-                alert('当前页面不是安全上下文（https 或 localhost），浏览器禁止访问摄像头/麦克风。\n请使用 http://localhost:9999/chat 访问。');
-                if (isCaller) { sendSignal(13, remoteUser, ''); closeVideo(); }
-                return;
-            }
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                alert('当前浏览器不支持 getUserMedia，请使用最新版 Chrome/Edge/Firefox。');
+                if (!window.isSecureContext) {
+                    alert('当前页面不是安全上下文（HTTPS 或 localhost），浏览器禁用了摄像头/麦克风 API。\n\n' +
+                        '解决方式（任选其一）：\n' +
+                        '1. 手机/电脑 Chrome 打开 chrome://flags/#unsafely-treat-insecure-origin-as-secure\n' +
+                        '   把 ' + location.origin + ' 填入并启用，重启浏览器；\n' +
+                        '2. 使用 HTTPS 访问（推荐）。');
+                } else {
+                    alert('当前浏览器不支持 getUserMedia，请使用最新版 Chrome/Edge/Firefox。');
+                }
                 if (isCaller) { sendSignal(13, remoteUser, ''); closeVideo(); }
                 return;
             }
@@ -784,7 +798,11 @@
         function createPeerConnection() {
             peerConnection = new RTCPeerConnection({
                 iceServers: [
-                    { urls: 'stun:stun.l.google.com:19302' }
+                    { urls: 'stun:stun.l.google.com:19302' },
+                    { urls: 'stun:stun1.l.google.com:19302' },
+                    { urls: 'stun:stun2.l.google.com:19302' },
+                    { urls: 'stun:stun3.l.google.com:19302' },
+                    { urls: 'stun:stun4.l.google.com:19302' }
                 ]
             });
 
